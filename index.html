@@ -3,30 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Tile Calculator</title>
+  <title>JAI THINDAL TILES</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- html2canvas (needed for doc.html) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>Smart Tile Calculator</h1>
+    <h1>SMART TILE CALCULATOR</h1>
+    <br>
 
     <!-- Area Selection -->
     <div id="checkboxAreaSelector" class="input-group">
-      <label>Select Area Types:</label><br>
+      <label><h3>Select Area Types</h3></label>
       <label><input type="checkbox" value="Kitchen"> Kitchen</label>
       <label><input type="checkbox" value="Bedroom"> Bedroom</label>
       <label><input type="checkbox" value="Bathroom"> Bathroom</label>
       <label><input type="checkbox" value="Living Room"> Living Room</label>
-      <label><input type="checkbox" value="Balcony"> Balcony</label><br>
+      <label><input type="checkbox" value="Balcony"> Balcony</label>
+      <label><input type="checkbox" value="Elevation"> Elevation</label>
+      <label><input type="checkbox" value="Parking"> Parking</label>
+      <br>
       <button onclick="confirmAreaSelection()">Calculate Area(s)</button>
     </div>
 
     <!-- Room Input Section -->
     <div id="roomInputs"></div>
 
+    <!-- Summary Button -->
     <button onclick="calculateAll()">📊 Final Summary Calculation</button>
+
+    <!-- Results Section -->
     <div id="resultOutput"></div>
+
+    <!-- Final Summary Section -->
+    <div id="finalSummary" style="display:none; border:1px solid #ccc; padding:1em; margin-top:1em; background:#fff;">
+      <h2>📊 Final Summary</h2>
+      <div id="summaryContent"></div>
+      <br>
+      <button onclick="printSummary()">🖨️ Print</button>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
