@@ -129,11 +129,11 @@ function calculateRoomDetails(button) {
           <p>Tiles along Width: ${tilesPerRow}</p>
           <p>Tiles along Height: ${rows}</p>
           <p>Tiles Required: ${totalTiles}</p>
-          <pre>________________________________________</pre>
+          <pre>_____________</pre>
           <p>Each Box Contains: ${spec.pcs} tiles</p>
           <p>Total Boxes: ${totalBoxes}</p>
           <p>Total Tile Area: ${totalTileArea.toFixed(2)} sq.ft</p>
-          <pre>________________________________________</pre>
+          <pre>_____________</pre>
           <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
           <p>Total Cost: ₹${cost.toFixed(2)}</p>
           <p>Total Weight: ${totalWeightThisType.toFixed(2)} kg</p>
