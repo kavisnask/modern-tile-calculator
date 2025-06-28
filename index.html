@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Tile Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Tile Calculator</h1>
+
+    <!-- Area Selection -->
+    <div id="checkboxAreaSelector" class="input-group">
+      <label>Select Area Types:</label><br>
+      <label><input type="checkbox" value="Kitchen"> Kitchen</label>
+      <label><input type="checkbox" value="Bedroom"> Bedroom</label>
+      <label><input type="checkbox" value="Bathroom"> Bathroom</label>
+      <label><input type="checkbox" value="Living Room"> Living Room</label>
+      <label><input type="checkbox" value="Balcony"> Balcony</label><br>
+      <button onclick="confirmAreaSelection()">Calculate Area(s)</button>
+    </div>
+
+    <!-- Room Input Section -->
+    <div id="roomInputs"></div>
+
+    <button onclick="calculateAll()">📊 Final Summary Calculation</button>
+    <div id="resultOutput"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
