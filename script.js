@@ -1,33 +1,37 @@
-// Tile specifications
+// ✅ Updated script.js for Smart Tile Calculator (Correct wall tile cost based on actual boxes)
+
+// Tile specifications with fixed coverage per box (sq.ft per box from your shop)
 const tileSpecs = {
-  "1": { pcs: 8, weight: 12.5, w: 1, h: 1, coverage: 8 },
-  "2.25": { pcs: 6, weight: 13, w: 1.5, h: 1.5, coverage: 9 },
-  "4": { pcs: 4, weight: 26, w: 2, h: 2, coverage: 16 },
-  "8": { pcs: 2, weight: 26, w: 4, h: 2, coverage: 16 },
-  "1.25": { pcs: 8, weight: 9, w: 1.25, h: 0.83, coverage: 8.33 },
-  "1.5": { pcs: 6, weight: 10.5, w: 1.5, h: 1, coverage: 9 },
-  "2": { pcs: 5, weight: 12.5, w: 2, h: 1, coverage: 10 },
-  "2.75x5.25": { pcs: 2, weight: 26, w: 2.75, h: 5.25, coverage: 28.88 }
+  "1": { pcs: 8, weight: 12.5, w: 1, h: 1, coverage: 8 },              // 1x1 - 12.5kg
+  "2.25": { pcs: 6, weight: 19, w: 1.5, h: 1.5, coverage: 8.9 },       // 16x16 - 19kg
+  "4": { pcs: 4, weight: 26, w: 2, h: 2, coverage: 16 },               // 2x2 - 26kg
+  "8": { pcs: 2, weight: 26, w: 4, h: 2, coverage: 16 },               // 4x2 - 26kg
+  "1.25": { pcs: 8, weight: 9, w: 1.25, h: 0.83, coverage: 8.33 },     // 15x10 - 9kg
+  "1.5": { pcs: 6, weight: 10.5, w: 1.5, h: 1, coverage: 9 },          // 18x12 - 10.5kg
+  "2": { pcs: 5, weight: 12.5, w: 2, h: 1, coverage: 10 },             // 2x1 - 12.5kg
+  "2.75x5.25": { pcs: 2, weight: 52, w: 2.75, h: 5.25, coverage: 28 } // 2.75x5.25 - 52kg
 };
 
 function confirmAreaSelection() {
   const selected = Array.from(document.querySelectorAll('#checkboxAreaSelector input[type="checkbox"]:checked')).map(cb => cb.value);
   const roomInputs = document.getElementById('roomInputs');
-  roomInputs.innerHTML = '';
 
   selected.forEach(area => {
-    const section = document.createElement('div');
-    section.classList.add('area-section');
-    section.innerHTML = `
-      <h3>${area}</h3>
-      <div class="input-group">
-        <label>Number of ${area}</label>
-        <input type="number" min="1" value="1" onchange="generateRooms('${area}', this.value)">
-      </div>
-      <div id="rooms-${area.replaceAll(' ', '')}"></div>
-    `;
-    roomInputs.appendChild(section);
-    generateRooms(area, 1);
+    const areaId = `rooms-${area.replaceAll(' ', '')}`;
+    if (!document.getElementById(areaId)) {
+      const section = document.createElement('div');
+      section.classList.add('area-section');
+      section.innerHTML = `
+        <h3>${area}</h3>
+        <div class="input-group">
+          <label>Number of ${area}</label>
+          <input type="number" min="1" value="1" onchange="generateRooms('${area}', this.value)">
+        </div>
+        <div id="${areaId}"></div>
+      `;
+      roomInputs.appendChild(section);
+      generateRooms(area, 1);
+    }
   });
 }
 
@@ -114,38 +118,21 @@ function calculateRoomDetails(button) {
         const tilesPerRow = Math.ceil(w / spec.w);
         const rows = Math.ceil(h / spec.h);
         const totalTiles = tilesPerRow * rows;
-        const totalBoxes = Math.ceil(totalTiles / spec.pcs);
-        const totalTileArea = totalTiles * tileArea;
-        const totalWeightThisType = totalBoxes * spec.weight;
-        const cost = w * h * p;
-
-        totalCost += cost;
-        totalWeight += totalWeightThisType;
 
         output += `
           <h5>${type === 'floor' ? '🧱 Floor Tile' : '🧱 Wall Tile'}</h5>
           <p>Total Area: ${(w * h).toFixed(2)} sq.ft</p>
-          <p>Tile Size: ${spec.w} ft × ${spec.h} ft = ${tileArea.toFixed(2)} sq.ft</p>
           <p>Tiles along Width: ${tilesPerRow}</p>
-          <p>Tiles along Height: ${rows}</p>
+          <p>Tiles along Length: ${rows}</p>
           <p>Tiles Required: ${totalTiles}</p>
-          <pre>_____________</pre>
-          <p>Each Box Contains: ${spec.pcs} tiles</p>
-          <p>Total Boxes: ${totalBoxes}</p>
-          <p>Total Tile Area: ${totalTileArea.toFixed(2)} sq.ft</p>
-          <pre>_____________</pre>
-          <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
-          <p>Total Cost: ₹${cost.toFixed(2)}</p>
-          <p>Total Weight: ${totalWeightThisType.toFixed(2)} kg</p>
+          <pre>____________________________________________________</pre>
         `;
 
         if (type === "wall") {
           const dark = parseInt(box.querySelector(`.${type}-dark`)?.value) || 0;
           const highlight = parseInt(box.querySelector(`.${type}-highlight`)?.value) || 0;
           const lightInput = box.querySelector(`.${type}-light`)?.value;
-          const light = lightInput !== ""
-            ? parseInt(lightInput)
-            : Math.max(0, rows - (dark + highlight));
+          const light = lightInput !== "" ? parseInt(lightInput) : Math.max(0, rows - (dark + highlight));
 
           const darkTiles = dark * tilesPerRow;
           const highlightTiles = highlight * tilesPerRow;
@@ -154,110 +141,210 @@ function calculateRoomDetails(button) {
           const darkBoxes = Math.ceil(darkTiles / spec.pcs);
           const highlightBoxes = Math.ceil(highlightTiles / spec.pcs);
           const lightBoxes = Math.ceil(lightTiles / spec.pcs);
+          const totalWallBoxes = darkBoxes + highlightBoxes + lightBoxes;
+          const totalSqFt = totalWallBoxes * spec.coverage;
+          const cost = totalSqFt * p;
+
+          totalCost += cost;
+          totalWeight += totalWallBoxes * spec.weight;
 
           output += `
-            <hr>
             <p>Dark Tile Rows: ${dark} → Tiles: ${darkTiles} → Boxes: ${darkBoxes}</p>
             <p>Highlight Tile Rows: ${highlight} → Tiles: ${highlightTiles} → Boxes: ${highlightBoxes}</p>
             <p>Light Tile Rows: ${light} → Tiles: ${lightTiles} → Boxes: ${lightBoxes}</p>
+            <p>Total Boxes: ${totalWallBoxes}</p>
+            <p>Each Box Contains: ${spec.pcs}</p>
+            <pre>____________________________________________________</pre>
+            <p>Total Sq.ft (from ${totalWallBoxes} boxes): ${totalSqFt.toFixed(2)} sq.ft</p>
+            <p>Total Cost: ₹${cost.toFixed(2)}</p>
+            <p>Total Weight: ${(totalWallBoxes * spec.weight).toFixed(2)} kg</p>
+          `;
+        } else {
+          const totalBoxes = Math.ceil(totalTiles / spec.pcs);
+          const totalSqFt = totalBoxes * spec.coverage;
+          const cost = totalSqFt * p;
+
+          totalCost += cost;
+          totalWeight += totalBoxes * spec.weight;
+
+          output += `
+            <p>Total Boxes: ${totalBoxes}</p>
+            <p>Each Box Contains: ${spec.pcs}</p>
+            <p>Total Sq.ft (from ${totalBoxes} boxes): ${totalSqFt.toFixed(2)} sq.ft</p>
+            <p>Total Cost: ₹${cost.toFixed(2)}</p>
+            <p>Total Weight: ${(totalBoxes * spec.weight).toFixed(2)} kg</p>
           `;
         }
+
+        output += `<pre>_________________________________________________</pre>`;
       }
     }
   });
 
   room.querySelector('.output-details').innerHTML = output +
-    `<hr><p><strong>Total Room Cost:</strong> ₹${totalCost.toFixed(2)}</p>
+    `<p><strong>Total Room Cost:</strong> ₹${totalCost.toFixed(2)}</p>
      <p><strong>Total Room Weight:</strong> ${totalWeight.toFixed(2)} kg</p>`;
 }
 
 function calculateAll() {
-  const areaSummary = {};
-  let grandTotalAmount = 0;
-  let grandTotalWeight = 0;
-  let grandTotalArea = 0;
-
-  document.querySelectorAll(".area-section").forEach(areaSection => {
-    const areaName = areaSection.querySelector("h3").textContent.trim();
-    let areaTotalAmount = 0;
-    let areaTotalWeight = 0;
-    let areaTotalArea = 0;
-
-    areaSection.querySelectorAll(".room-section").forEach(roomSection => {
-      const output = roomSection.querySelector(".output-details");
-      if (output && output.innerHTML.trim() !== "") {
-        const areaMatch = output.innerHTML.match(/Total Area:\s([\d.]+)\s*sq\.ft/i);
-        if (areaMatch) areaTotalArea += parseFloat(areaMatch[1]);
-
-        const costMatch = output.innerHTML.match(/Total Room Cost:<\/strong>\s*₹([\d.]+)/i);
-        if (costMatch) areaTotalAmount += parseFloat(costMatch[1]);
-
-        const weightMatch = output.innerHTML.match(/Total Room Weight:<\/strong>\s*([\d.]+)\s*kg/i);
-        if (weightMatch) areaTotalWeight += parseFloat(weightMatch[1]);
-      }
-    });
-
-    if (areaTotalAmount > 0 || areaTotalWeight > 0 || areaTotalArea > 0) {
-      areaSummary[areaName] = {
-        totalAmount: areaTotalAmount,
-        totalWeight: areaTotalWeight,
-        totalArea: areaTotalArea
-      };
-
-      grandTotalAmount += areaTotalAmount;
-      grandTotalWeight += areaTotalWeight;
-      grandTotalArea += areaTotalArea;
-    }
-  });
-
-  const summaryDiv = document.getElementById("summaryContent");
-  summaryDiv.innerHTML = "";
-  for (const [area, data] of Object.entries(areaSummary)) {
-    summaryDiv.innerHTML += `
-      <h3>${area}</h3>
-      <p><strong>Total Area:</strong> ${data.totalArea.toFixed(2)} sq.ft</p>
-      <p><strong>Total Weight:</strong> ${data.totalWeight.toFixed(2)} kg</p>
-      <p><strong>Total Amount:</strong> ₹${data.totalAmount.toFixed(2)}</p>
-      <hr>
-    `;
-  }
-
-  summaryDiv.innerHTML += `
-    <h3>Grand Total</h3>
-    <p><strong>Total Area:</strong> ${grandTotalArea.toFixed(2)} sq.ft</p>
-    <p><strong>Total Weight:</strong> ${grandTotalWeight.toFixed(2)} kg</p>
-    <p><strong>Total Payable Amount:</strong> ₹${grandTotalAmount.toFixed(2)}</p>
-  `;
-
-  document.getElementById("finalSummary").style.display = "block";
+  // Optional: loop through all rooms and call calculateRoomDetails
 }
 
 function printSummary() {
-  const summaryElement = document.getElementById("finalSummary");
-  if (!summaryElement) {
-    alert("Final summary not found.");
-    return;
-  }
+  // Optional: trigger print and then optionally clear fields manually if needed
+}
+function calculateAll() {
+  const allRooms = document.querySelectorAll('.room-section');
+  const summaryContent = document.getElementById('summaryContent');
+  summaryContent.innerHTML = ''; // Clear previous summary
 
-  const summaryContent = summaryElement.outerHTML;
-  const printWindow = window.open('', '', 'width=800,height=600');
+  let grandTotalArea = 0;
+  let grandTotalWeight = 0;
+  let grandTotalCost = 0;
+
+  allRooms.forEach((room, idx) => {
+    const areaTitle = room.querySelector('h4')?.textContent || `Room ${idx + 1}`;
+    const outputBox = room.querySelector('.output-details');
+
+    // Calculate again to make sure data is present
+    calculateRoomDetails(room.querySelector('button'));
+
+    const outputHTML = outputBox.innerHTML;
+    if (outputHTML.trim()) {
+      summaryContent.innerHTML += `<div class="area-section"><h3>${areaTitle}</h3>${outputHTML}</div>`;
+
+      // Extract totals for grand summary
+      const areaMatch = outputHTML.match(/Total Area:\s([\d.]+)\s/);
+      const costMatch = outputHTML.match(/Total Room Cost:<\/strong>\s₹([\d.]+)/);
+      const weightMatch = outputHTML.match(/Total Room Weight:<\/strong>\s([\d.]+)/);
+
+      grandTotalArea += areaMatch ? parseFloat(areaMatch[1]) : 0;
+      grandTotalCost += costMatch ? parseFloat(costMatch[1]) : 0;
+      grandTotalWeight += weightMatch ? parseFloat(weightMatch[1]) : 0;
+    }
+  });
+
+  // Append Grand Totals
+  summaryContent.innerHTML += `
+    <div class="output-details">
+      <h3>🏁 Grand Total Summary</h3>
+      <p><strong>Total Area:</strong> ${grandTotalArea.toFixed(2)} sq.ft</p>
+      <p><strong>Total Weight:</strong> ${grandTotalWeight.toFixed(2)} kg</p>
+      <p><strong>Total Customer Payment:</strong> ₹${grandTotalCost.toFixed(2)}</p>
+    </div>
+  `;
+
+  document.getElementById('finalSummary').style.display = 'block';
+}
+
+function printSummary() {
+  const summaryHTML = document.getElementById('finalSummary').innerHTML;
+
+  const printWindow = window.open('', '_blank');
+
   printWindow.document.write(`
     <html>
-      <head>
-        <title>Print Summary</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding:20px; }
-          h2 { margin-top:0; }
-          div { border:1px solid #ccc; padding:1em; background:#fff; }
-        </style>
-      </head>
-      <body>
-        ${summaryContent}
-      </body>
+    <head>
+      <title>Final Summary</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 30px;
+          color: #000;
+        }
+        h1.title {
+          text-align: center;
+          color: #2c3e50;
+          border-bottom: 2px solid #2c3e50;
+          padding-bottom: 10px;
+          margin-bottom: 30px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        table th, table td {
+          border: 1px solid #888;
+          padding: 10px;
+          text-align: left;
+          vertical-align: top;
+        }
+        table th {
+          background-color: #f2f2f2;
+        }
+        .copy-title {
+          text-align: right;
+          font-size: 14px;
+          font-style: italic;
+          color: #555;
+          margin-bottom: 10px;
+        }
+        .section {
+          margin-bottom: 50px;
+        }
+      </style>
+    </head>
+    <body>
+      <h1 class="title">JAI THINDAL TILES ESTIMATE</h1>
+
+      <div class="section">
+        <div class="copy-title">Copy 1</div>
+        ${convertHTMLToTables(summaryHTML)}
+      </div>
+
+      <hr style="margin:40px 0;">
+
+      <div class="section">
+        <div class="copy-title">Copy 2</div>
+        ${convertHTMLToTables(summaryHTML)}
+      </div>
+    </body>
     </html>
   `);
+
   printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
+
+  // Wait for the content to fully load before printing
+  printWindow.onload = function () {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = function () {
+      printWindow.close();
+    };
+  };
+
+  // Inline helper function to convert raw HTML to table format
+  function convertHTMLToTables(rawHTML) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = rawHTML;
+
+    const sections = tempDiv.querySelectorAll('.area-section, .output-details');
+    let output = '';
+
+    sections.forEach((section) => {
+      const title = section.querySelector('h3')?.textContent || '';
+      const lines = section.innerText.split(/\n|\r/).filter(line => line.trim() !== '');
+
+      let rows = '';
+      lines.forEach(line => {
+        if (line.includes('→')) {
+          const [left, right] = line.split('→');
+          rows += `<tr><td>${left.trim()}</td><td>${right.trim()}</td></tr>`;
+        } else if (line.includes(':')) {
+          const [label, value] = line.split(':');
+          rows += `<tr><td>${label.trim()}</td><td>${value.trim()}</td></tr>`;
+        } else {
+          rows += `<tr><td colspan="2">${line.trim()}</td></tr>`;
+        }
+      });
+
+      output += `
+        <h3>${title}</h3>
+        <table>${rows}</table>
+      `;
+    });
+
+    return output;
+  }
 }

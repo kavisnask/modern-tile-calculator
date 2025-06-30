@@ -36,6 +36,28 @@ input[type="number"], select {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
+.toast {
+  visibility: hidden;
+  min-width: 250px;
+  background-color: #4CAF50;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  right: 30px;
+  top: 30px;
+  font-size: 16px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+  transition: visibility 0.3s, transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast.show {
+  visibility: visible;
+  transform: translateY(0px);
+  opacity: 1;
+}
 
 button {
   background-color: #3498db;
@@ -77,4 +99,13 @@ button:hover {
 
 h3, h4, h5 {
   color: #34495e;
+}
+@media print {
+  body {
+    font-size: 14px;
+  }
+
+  .area-section, .output-details {
+    page-break-inside: avoid;
+  }
 }

@@ -13,8 +13,10 @@
 <body>
   <div class="container">
     <h1>SMART TILE CALCULATOR</h1>
-    <br>
 
+
+    <br>
+<div id="toast" class="toast">Logout Successful ✅</div>
     <!-- Area Selection -->
     <div id="checkboxAreaSelector" class="input-group">
       <label><h3>Select Area Types</h3></label>
@@ -46,6 +48,28 @@
       <button onclick="printSummary()">🖨️ Print</button>
     </div>
   </div>
+
+  <script>
+  function goBack() {
+    window.location.href = "home.html"; // Your homepage
+  }
+
+  function logoutUser() {
+    const email = localStorage.getItem("currentUser");
+    if (email) {
+      // Remove user from activeUsers
+      let activeUsers = JSON.parse(localStorage.getItem("activeUsers")) || [];
+      activeUsers = activeUsers.filter(user => user !== email);
+      localStorage.setItem("activeUsers", JSON.stringify(activeUsers));
+
+      // Clear current user
+      localStorage.removeItem("currentUser");
+    }
+
+    // Redirect to login
+    window.location.href = "login.html";
+  }
+</script>
 
   <script src="script.js"></script>
 </body>
