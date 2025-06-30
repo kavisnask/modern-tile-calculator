@@ -125,7 +125,7 @@ function calculateRoomDetails(button) {
           <p>Tiles along Width: ${tilesPerRow}</p>
           <p>Tiles along Length: ${rows}</p>
           <p>Tiles Required: ${totalTiles}</p>
-          <pre>____________________________________________________</pre>
+          <pre>_______________</pre>
         `;
 
         if (type === "wall") {
@@ -154,7 +154,7 @@ function calculateRoomDetails(button) {
             <p>Light Tile Rows: ${light} → Tiles: ${lightTiles} → Boxes: ${lightBoxes}</p>
             <p>Total Boxes: ${totalWallBoxes}</p>
             <p>Each Box Contains: ${spec.pcs}</p>
-            <pre>____________________________________________________</pre>
+            <pre>_______________</pre>
             <p>Total Sq.ft (from ${totalWallBoxes} boxes): ${totalSqFt.toFixed(2)} sq.ft</p>
             <p>Total Cost: ₹${cost.toFixed(2)}</p>
             <p>Total Weight: ${(totalWallBoxes * spec.weight).toFixed(2)} kg</p>
@@ -176,7 +176,7 @@ function calculateRoomDetails(button) {
           `;
         }
 
-        output += `<pre>_________________________________________________</pre>`;
+        output += `<pre>_______________</pre>`;
       }
     }
   });
