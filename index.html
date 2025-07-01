@@ -5,18 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>JAI THINDAL TILES</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- jsPDF CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- html2canvas (needed for doc.html) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>SMART TILE CALCULATOR</h1>
-
-
     <br>
-<div id="toast" class="toast">Logout Successful ✅</div>
+    <!-- Toast message -->
+    <div id="toast" class="toast">Logout Successful ✅</div>
+
     <!-- Area Selection -->
     <div id="checkboxAreaSelector" class="input-group">
       <label><h3>Select Area Types</h3></label>
@@ -27,49 +23,44 @@
       <label><input type="checkbox" value="Balcony"> Balcony</label>
       <label><input type="checkbox" value="Elevation"> Elevation</label>
       <label><input type="checkbox" value="Parking"> Parking</label>
+      <div class="input-group">
+        <label><input type="checkbox" id="totalFloorCheckbox" onchange="toggleTotalFloor()"> Total Floor Only</label>
+      </div>
       <br>
       <button onclick="confirmAreaSelection()">Calculate Area(s)</button>
+    </div>
+
+    <!-- Total Floor Option -->
+    <div id="totalFloorInputs" style="display:none;" class="area-section">
+      <h3>Total Floor Calculation</h3>
+      <input type="number" id="totalFloorLength" placeholder="Total Floor Length (in ft)">
+      <input type="number" id="totalFloorWidth" placeholder="Total Floor Width (in ft)">
+      <select id="totalFloorTileSize">
+        <option value="1">1 x 1</option>
+        <option value="2.25">16 x 16</option>
+        <option value="4">2 x 2</option>
+        <option value="8">4 x 2</option>
+        <option value="2.75x5.25">2.75 x 5.25</option>
+      </select>
+      <input type="number" id="totalFloorPrice" placeholder="Price per Sq.ft (₹)">
+      <br>
+      <button onclick="calculateTotalFloor()">📋 Calculate Total Floor</button>
+      <div id="totalFloorOutput" class="output-details"></div>
     </div>
 
     <!-- Room Input Section -->
     <div id="roomInputs"></div>
 
-    <!-- Summary Button -->
-    <button onclick="calculateAll()">📊 Final Summary Calculation</button>
-
-    <!-- Results Section -->
-    <div id="resultOutput"></div>
-
-    <!-- Final Summary Section -->
-    <div id="finalSummary" style="display:none; border:1px solid #ccc; padding:1em; margin-top:1em; background:#fff;">
-      <h2>📊 Final Summary</h2>
-      <div id="summaryContent"></div>
-      <br>
-      <button onclick="printSummary()">🖨️ Print</button>
-    </div>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+  <button onclick="finalSummaryCalculation()">🏁 Final Summary Calculation</button>
+  <div id="printButtonWrapper" style="display: none;">
+    <button onclick="printEstimate()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer;">🖨️ Print Estimate</button>
   </div>
+</div>
 
-  <script>
-  function goBack() {
-    window.location.href = "home.html"; // Your homepage
-  }
-
-  function logoutUser() {
-    const email = localStorage.getItem("currentUser");
-    if (email) {
-      // Remove user from activeUsers
-      let activeUsers = JSON.parse(localStorage.getItem("activeUsers")) || [];
-      activeUsers = activeUsers.filter(user => user !== email);
-      localStorage.setItem("activeUsers", JSON.stringify(activeUsers));
-
-      // Clear current user
-      localStorage.removeItem("currentUser");
-    }
-
-    // Redirect to login
-    window.location.href = "login.html";
-  }
-</script>
+    <!-- Summary Output -->
+    <pre id="grandSummaryOutput" style="background:#fefefe; padding:15px; border:1px solid #ccc; margin-top:20px; white-space:pre-wrap;"></pre>
+  </div>
 
   <script src="script.js"></script>
 </body>
