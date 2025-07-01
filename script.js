@@ -117,15 +117,6 @@ function calculateRoomDetails(button) {
         const rows = Math.ceil(h / spec.h);
         const totalTiles = tilesPerRow * rows;
 
-        output += `
-          <h5>${type === 'floor' ? '🧱 Floor Tile' : '🧱 Wall Tile'}</h5>
-          <p>Total Area: ${(w * h).toFixed(2)} sq.ft</p>
-          <p>Tiles along Width: ${tilesPerRow}</p>
-          <p>Tiles along Length: ${rows}</p>
-          <p>Tiles Required: ${totalTiles}</p>
-          <pre>_______________</pre>
-        `;
-
         if (type === "wall") {
           const dark = parseInt(box.querySelector(`.${type}-dark`)?.value) || 0;
           const highlight = parseInt(box.querySelector(`.${type}-highlight`)?.value) || 0;
@@ -147,15 +138,17 @@ function calculateRoomDetails(button) {
           totalWeight += totalWallBoxes * spec.weight;
 
           output += `
-            <p>Dark Tile Rows: ${dark} → Tiles: ${darkTiles} → Boxes: ${darkBoxes}</p>
-            <p>Highlight Tile Rows: ${highlight} → Tiles: ${highlightTiles} → Boxes: ${highlightBoxes}</p>
-            <p>Light Tile Rows: ${light} → Tiles: ${lightTiles} → Boxes: ${lightBoxes}</p>
+            <h5>🧱 Wall Tile</h5>
+            <p>Tiles along Width: ${tilesPerRow}</p>
+            <p>Tiles along Length: ${rows}</p>
+            <p>Dark Tile Rows: ${dark} → Boxes: ${darkBoxes}</p>
+            <p>Highlight Tile Rows: ${highlight} → Boxes: ${highlightBoxes}</p>
+            <p>Light Tile Rows: ${light} → Boxes: ${lightBoxes}</p>
             <p>Total Boxes: ${totalWallBoxes}</p>
-            <p>Each Box Contains: ${spec.pcs}</p>
-            <pre>_______________</pre>
             <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
             <p>Total Cost: ₹${cost.toFixed(2)}</p>
             <p>Total Weight: ${(totalWallBoxes * spec.weight).toFixed(2)} kg</p>
+            <pre>_______________</pre>
           `;
         } else {
           const totalBoxes = Math.ceil(totalTiles / spec.pcs);
@@ -166,16 +159,16 @@ function calculateRoomDetails(button) {
           totalWeight += totalBoxes * spec.weight;
 
           output += `
+            <h5>🧱 Floor Tile</h5>
+            <p>Tiles along Width: ${tilesPerRow}</p>
+            <p>Tiles along Length: ${rows}</p>
             <p>Total Boxes: ${totalBoxes}</p>
-            <p>Each Box Contains: ${spec.pcs}</p>
-            <pre>_______________</pre>
             <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
             <p>Total Cost: ₹${cost.toFixed(2)}</p>
             <p>Total Weight: ${(totalBoxes * spec.weight).toFixed(2)} kg</p>
+            <pre>_______________</pre>
           `;
         }
-
-        output += `<pre>_______________</pre>`;
       }
     }
   });
@@ -192,7 +185,6 @@ function finalSummaryCalculation() {
   let printTables = '';
 
   const customerData = JSON.parse(localStorage.getItem('customerData')) || {};
-
   const customerDetails = `
     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
       <div>
@@ -270,24 +262,20 @@ function finalSummaryCalculation() {
 
     if (floorContent || wallContent) {
       let sectionTable = `
-  <table border="1" style="width:100%; border-collapse: collapse;">
-    <thead><tr><th colspan="2">AREA - ${roomTitle}</th></tr></thead>
-    <tbody>`;
+        <table border="1" style="width:100%; border-collapse: collapse;">
+          <thead><tr><th colspan="2">AREA - ${roomTitle}</th></tr></thead>
+          <tbody>`;
 
-if (floorContent) {
-  sectionTable += `
-    <tr><td colspan="2">Floor Tile</td></tr>
-    ${floorContent}`;
-}
+      if (floorContent) {
+        sectionTable += `<tr><td colspan="2">Floor Tile</td></tr>${floorContent}`;
+      }
 
-if (wallContent) {
-  sectionTable += `
-    <tr><td colspan="2">Wall Tile</td></tr>
-    ${wallContent}`;
-}
+      if (wallContent) {
+        sectionTable += `<tr><td colspan="2">Wall Tile</td></tr>${wallContent}`;
+      }
 
-sectionTable += `</tbody></table><br>`;
-printTables += sectionTable;
+      sectionTable += `</tbody></table><br>`;
+      printTables += sectionTable;
 
       grandTotalArea += roomArea;
       grandTotalCost += roomCost;
@@ -297,6 +285,7 @@ printTables += sectionTable;
 
   const weightRatePerKg = 2.2;
   let weightCost = Math.ceil((grandTotalWeight * weightRatePerKg) / 10) * 10;
+  const tileOnlyCost = grandTotalCost;
   grandTotalCost += weightCost;
 
   const grandTable = `
@@ -305,6 +294,7 @@ printTables += sectionTable;
       <tbody>
         <tr><td>Total Area</td><td>${grandTotalArea.toFixed(2)} sq.ft</td></tr>
         <tr><td>Total Weight</td><td>${grandTotalWeight.toFixed(2)} kg</td></tr>
+        <tr><td>Total Tile Cost</td><td>₹${tileOnlyCost.toFixed(2)}</td></tr>
         <tr><td>Total Weight Cost</td><td>₹${weightCost.toFixed(2)}</td></tr>
         <tr><td>Total Customer Amount</td><td>₹${grandTotalCost.toFixed(2)}</td></tr>
       </tbody>
@@ -319,7 +309,7 @@ printTables += sectionTable;
   document.getElementById("grandSummaryOutput").innerHTML = finalOutput;
 }
 
-// 🔘 Attach Print Button beside Final Summary button
+// 🔘 Add Print Button beside Final Summary Button
 document.addEventListener('DOMContentLoaded', () => {
   const finalBtn = document.querySelector('button[onclick="finalSummaryCalculation()"]');
   const printBtn = document.createElement('button');
@@ -334,18 +324,3 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   finalBtn.insertAdjacentElement('afterend', printBtn);
 });
-
-function printEstimate() {
-  const content = document.getElementById("grandSummaryOutput").innerHTML;
-  const twoCopies = `<div style="page-break-after: always;">${content}</div><div>${content}</div>`;
-  const printWindow = window.open('', '', 'width=800,height=1000');
-  printWindow.document.write(`
-    <html>
-    <head><title>Print Estimate</title></head>
-    <body>${twoCopies}
-    <script>window.onload = function(){ window.print(); }</script>
-    </body>
-    </html>`);
-  printWindow.document.close();
-}
-
