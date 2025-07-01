@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Customer Entry</title>
+  <link rel="stylesheet" href="homepage.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Customer Information</h2>
+    <form id="customerForm">
+      <label>Customer Name:</label>
+      <input type="text" id="name" required>
+
+      <label>Customer Address:</label>
+      <textarea id="address" required></textarea>
+
+      <label>Customer Mobile Number:</label>
+      <input type="tel" id="mobile" pattern="[0-9]{10}" required>
+
+      <label>Attender Name:</label>
+      <select id="attender" required>
+        <option value="">Select Attender</option>
+        <option value="Suresh">Suresh</option>
+        <option value="Ravi">Ravi</option>
+        <option value="Anand">Anand</option>
+      </select>
+
+      <label>Attender Mobile Number:</label>
+      <select id="attenderMobile" required>
+        <option value="">Select Number</option>
+        <option value="9876543210">9876543210</option>
+        <option value="9001234567">9001234567</option>
+        <option value="8800456789">8800456789</option>
+      </select>
+
+      <button type="submit">Confirm</button>
+    </form>
+  </div>
+
+  <script>
+  function showToast(message, callback) {
+    const toast = document.createElement("div");
+    toast.innerText = message;
+    toast.style.position = "fixed";
+    toast.style.bottom = "30px";
+    toast.style.left = "50%";
+    toast.style.transform = "translateX(-50%)";
+    toast.style.background = "#4CAF50";
+    toast.style.color = "#fff";
+    toast.style.padding = "16px 24px";
+    toast.style.fontSize = "16px";
+    toast.style.borderRadius = "8px";
+    toast.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+    toast.style.zIndex = "9999";
+
+    const okButton = document.createElement("button");
+    okButton.innerText = "OK";
+    okButton.style.marginLeft = "15px";
+    okButton.style.padding = "6px 14px";
+    okButton.style.background = "#fff";
+    okButton.style.color = "#4CAF50";
+    okButton.style.border = "none";
+    okButton.style.borderRadius = "4px";
+    okButton.style.cursor = "pointer";
+
+    okButton.onclick = () => {
+      document.body.removeChild(toast);
+      if (callback) callback();
+    };
+
+    toast.appendChild(okButton);
+    document.body.appendChild(toast);
+  }
+
+  // ✅ Remove data if the page was reloaded (refresh)
+  if (performance.navigation.type === 1 || performance.getEntriesByType("navigation")[0].type === "reload") {
+    localStorage.removeItem("customerData");
+  }
+
+  document.getElementById("customerForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById("name").value,
+      address: document.getElementById("address").value,
+      mobile: document.getElementById("mobile").value,
+      attender: document.getElementById("attender").value,
+      attenderMobile: document.getElementById("attenderMobile").value,
+    };
+    localStorage.setItem("customerData", JSON.stringify(data));
+
+    showToast("✅ Data Stored Successfully", () => {
+      window.location.href = "index.html";
+    });
+  });
+
+  // Prefill if data exists
+  const oldData = JSON.parse(localStorage.getItem("customerData"));
+  if (oldData) {
+    document.getElementById("name").value = oldData.name || "";
+    document.getElementById("address").value = oldData.address || "";
+    document.getElementById("mobile").value = oldData.mobile || "";
+    document.getElementById("attender").value = oldData.attender || "";
+    document.getElementById("attenderMobile").value = oldData.attenderMobile || "";
+  }
+</script>
+</body>
+</html>
