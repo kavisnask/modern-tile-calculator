@@ -23,30 +23,44 @@
       <label><input type="checkbox" value="Balcony"> Balcony</label>
       <label><input type="checkbox" value="Elevation"> Elevation</label>
       <label><input type="checkbox" value="Parking"> Parking</label>
-      <div class="input-group">
-        <label><input type="checkbox" id="totalFloorCheckbox" onchange="toggleTotalFloor()"> Total Floor Only</label>
-      </div>
+      <label><input type="checkbox" value="Total Floor Only"> Total Floor Only</label>
       <br>
       <button onclick="confirmAreaSelection()">Calculate Area(s)</button>
     </div>
 
-    <!-- Total Floor Option -->
-    <div id="totalFloorInputs" style="display:none;" class="area-section">
-      <h3>Total Floor Calculation</h3>
-      <input type="number" id="totalFloorLength" placeholder="Total Floor Length (in ft)">
-      <input type="number" id="totalFloorWidth" placeholder="Total Floor Width (in ft)">
-      <select id="totalFloorTileSize">
-        <option value="1">1 x 1</option>
-        <option value="2.25">16 x 16</option>
-        <option value="4">2 x 2</option>
-        <option value="8">4 x 2</option>
-        <option value="2.75x5.25">2.75 x 5.25</option>
-      </select>
-      <input type="number" id="totalFloorPrice" placeholder="Price per Sq.ft (₹)">
-      <br>
-      <button onclick="calculateTotalFloor()">📋 Calculate Total Floor</button>
-      <div id="totalFloorOutput" class="output-details"></div>
-    </div>
+ <div id="totalFloorInputs" style="display:none;" class="area-section">
+  <h3>Total Floor Calculation</h3>
+  <label><input type="checkbox" id="floorCheckbox" checked onchange="toggleTotalFloorInputs()"> Floor</label>
+  <label><input type="checkbox" id="sideCuttingCheckbox" onchange="toggleTotalFloorInputs()"> Side Cutting</label>
+
+  <!-- Floor Inputs -->
+  <div id="floorInputs">
+    <input type="number" id="totalFloorLength" placeholder="Length (ft)">
+    <input type="number" id="totalFloorWidth" placeholder="Width (ft)">
+    <select id="floorTileSize">
+      <option value="1">1 x 1</option>
+      <option value="2.25">16 x 16</option>
+      <option value="4">2 x 2</option>
+      <option value="8">4 x 2</option>
+      <option value="2.75x5.25">2.75 x 5.25</option>
+    </select>
+    <input type="number" id="floorPrice" placeholder="Price per Sq.ft (₹)">
+  </div>
+
+  <!-- Side Cutting Inputs -->
+  <div id="sideCuttingInputs" style="display:none;">
+    <input type="number" id="sideCuttingRunningFeet" placeholder="Running Feet">
+    <select id="sideTileSize">
+      <option value="4">2 x 2</option>
+      <option value="8">2 x 4</option>
+    </select>
+    <input type="number" id="sidePrice" placeholder="Price per Sq.ft (₹)">
+  </div>
+
+  <button onclick="calculateTotalFloor()">📋 Calculate Total Floor</button>
+  <div id="totalFloorOutput" class="output-details"></div>
+</div>
+
 
     <!-- Room Input Section -->
     <div id="roomInputs"></div>
