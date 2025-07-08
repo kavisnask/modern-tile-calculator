@@ -2,13 +2,15 @@ let totalFloorData = null;
 
 const tileSpecs = {
   "1": { pcs: 8, weight: 12.5, w: 1, h: 1, coverage: 8 },
+  "1x1_9": { pcs: 9, weight: 13, w: 1, h: 1, coverage: 9 },
+  "4x2_3": { pcs: 3, weight: 30, w: 4, h: 2, coverage: 24 },
   "2.25": { pcs: 6, weight: 19, w: 1.5, h: 1.5, coverage: 8.9 },
   "4": { pcs: 4, weight: 26, w: 2, h: 2, coverage: 16 },
   "8": { pcs: 2, weight: 26, w: 4, h: 2, coverage: 16 },
-  "1.25": { pcs: 8, weight: 9, w: 1.25, h: 0.83, coverage: 8.33 },
-  "1.5": { pcs: 6, weight: 10.5, w: 1.5, h: 1, coverage: 9 },
-  "2": { pcs: 5, weight: 12.5, w: 2, h: 1, coverage: 10 },
-  "2.75x5.25": { pcs: 2, weight: 52, w: 2.75, h: 5.25, coverage: 28 }
+  "2.75x5.25": { pcs: 2, weight: 52, w: 2.75, h: 5.25, coverage: 28 },
+  "1.25": { pcs: 6, weight: 13, w: 1.25, h: 1, coverage: 7.5 },
+  "1.5": { pcs: 6, weight: 15, w: 1.5, h: 1, coverage: 9 },
+  "2": { pcs: 6, weight: 18, w: 2, h: 1, coverage: 12 }
 };
 
 function confirmAreaSelection() {
@@ -103,6 +105,8 @@ function generateRooms(area, count) {
           <option value="4">2 x 2</option>
           <option value="8">4 x 2</option>
           <option value="2.75x5.25">2.75 x 5.25</option>
+          <option value="1x1_9">1 x 1 (9)</option> <!-- NEW -->
+  <option value="4x2_3">4 x 2 (3)</option> <!-- NEW -->
         </select>
         <input type="number" class="floor-price" placeholder="Price per Sq.ft (₹)">
       </div>
@@ -130,7 +134,7 @@ function generateRooms(area, count) {
           <option value="2">2 x 1</option>
         </select>
         <input type="number" class="highlight-count" placeholder="Number of Tiles">
-        <input type="number" class="highlight-price" placeholder="Price per Tile (₹)">
+        <input type="number" class="highlight-price" placeholder="Price per sq.feet ">
       </div>
 
       <button onclick="calculateRoomDetails(this)">📋 Room ${i} Calculation</button>
@@ -150,6 +154,7 @@ function calculateRoomDetails(button) {
   let output = '';
   let totalCost = 0;
   let totalWeight = 0;
+  let totalArea = 0;
 
   ["floor", "wall", "highlight"].forEach(type => {
     const box = room.querySelector(`.${type}-tile-inputs`);
@@ -160,44 +165,58 @@ function calculateRoomDetails(button) {
 
       if (type === "highlight") {
         const numTiles = parseInt(box.querySelector('.highlight-count')?.value);
-        const pricePerTile = parseFloat(box.querySelector('.highlight-price')?.value);
-        if (!isNaN(numTiles) && !isNaN(pricePerTile)) {
-          const weightPerTile = spec.weight / spec.pcs;
-          const cost = numTiles * pricePerTile;
-          const weight = numTiles * weightPerTile;
+        const pricePerSqft = parseFloat(box.querySelector('.highlight-price')?.value);
+
+        if (!isNaN(numTiles) && !isNaN(pricePerSqft)) {
+          const tilesPerBox = spec.pcs;
+          const coveragePerBox = spec.coverage;
+          const weightPerBox = spec.weight;
+
+          const area = (numTiles / tilesPerBox) * coveragePerBox;
+          const cost = area * pricePerSqft;
+          const weight = numTiles * (weightPerBox / tilesPerBox);
+
           totalCost += cost;
           totalWeight += weight;
+          totalArea += area;
+
           output += `
             <h5>🌟 Highlight Tiles</h5>
-            <p>Tile Size: ${tileKey}</p>
             <p>Number of Tiles: ${numTiles}</p>
-            <p>Price per Tile: ₹${pricePerTile.toFixed(2)}</p>
+            <p>Area: ${area.toFixed(2)} sq.ft</p>
+            <p>Price per Sq.ft: ₹${pricePerSqft.toFixed(2)}</p>
             <p>Total Cost: ₹${cost.toFixed(2)}</p>
             <p>Total Weight: ${weight.toFixed(2)} kg</p>
-            
           `;
         }
       } else {
         const w = parseFloat(box.querySelector(`.${type}-width`)?.value);
         const h = parseFloat(box.querySelector(`.${type}-height`)?.value);
         const p = parseFloat(box.querySelector(`.${type}-price`)?.value);
+
         if (!isNaN(w) && !isNaN(h) && !isNaN(p)) {
           const tilesPerRow = Math.ceil(w / spec.w);
           const rows = Math.ceil(h / spec.h);
           const totalTiles = tilesPerRow * rows;
+
           if (type === "wall") {
             const dark = parseInt(box.querySelector('.wall-dark')?.value) || 0;
             const highlight = parseInt(box.querySelector('.wall-highlight')?.value) || 0;
             const lightInput = box.querySelector('.wall-light')?.value;
             const light = lightInput !== "" ? parseInt(lightInput) : Math.max(0, rows - (dark + highlight));
+
             const darkBoxes = Math.ceil((dark * tilesPerRow) / spec.pcs);
             const highlightBoxes = Math.ceil((highlight * tilesPerRow) / spec.pcs);
             const lightBoxes = Math.ceil((light * tilesPerRow) / spec.pcs);
             const totalBoxes = darkBoxes + highlightBoxes + lightBoxes;
             const totalSqFt = totalBoxes * spec.coverage;
             const cost = totalSqFt * p;
+            const weight = totalBoxes * spec.weight;
+
             totalCost += cost;
-            totalWeight += totalBoxes * spec.weight;
+            totalWeight += weight;
+            totalArea += totalSqFt;
+
             output += `
               <h5>🧱 Wall Tile</h5>
               <p>Tiles along Width: ${tilesPerRow}</p>
@@ -209,15 +228,18 @@ function calculateRoomDetails(button) {
               <pre>_______________</pre>
               <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
               <p>Total Cost: ₹${cost.toFixed(2)}</p>
-              <p>Total Weight: ${(totalBoxes * spec.weight).toFixed(2)} kg</p>
-              
+              <p>Total Weight: ${weight.toFixed(2)} kg</p>
             `;
           } else {
             const totalBoxes = Math.ceil(totalTiles / spec.pcs);
             const totalSqFt = totalBoxes * spec.coverage;
             const cost = totalSqFt * p;
+            const weight = totalBoxes * spec.weight;
+
             totalCost += cost;
-            totalWeight += totalBoxes * spec.weight;
+            totalWeight += weight;
+            totalArea += totalSqFt;
+
             output += `
               <h5>🧱 Floor Tile</h5>
               <p>Tiles along Width: ${tilesPerRow}</p>
@@ -226,7 +248,7 @@ function calculateRoomDetails(button) {
               <pre>_______________</pre>
               <p>Price per Sq.ft: ₹${p.toFixed(2)}</p>
               <p>Total Cost: ₹${cost.toFixed(2)}</p>
-              <p>Total Weight: ${(totalBoxes * spec.weight).toFixed(2)} kg</p>
+              <p>Total Weight: ${weight.toFixed(2)} kg</p>
               <pre>_______________</pre>
             `;
           }
@@ -235,8 +257,32 @@ function calculateRoomDetails(button) {
     }
   });
 
+  // ✅ Add manual floor calculation here
+  const manualFloorBox = room.querySelector('.manual-floor-inputs');
+  if (manualFloorBox) {
+    const manualArea = parseFloat(manualFloorBox.querySelector('.manual-floor-area')?.value);
+    const manualPrice = parseFloat(manualFloorBox.querySelector('.manual-floor-price')?.value);
+    
+    if (!isNaN(manualArea) && !isNaN(manualPrice)) {
+      const manualCost = manualArea * manualPrice;
+
+      totalCost += manualCost;
+      totalArea += manualArea;
+
+      output += `
+        <h5>➕ Additional Floor (Manual Entry)</h5>
+        <p>Total Area: ${manualArea.toFixed(2)} sq.ft</p>
+        <p>Price per Sq.ft: ₹${manualPrice.toFixed(2)}</p>
+        <p>Total Cost: ₹${manualCost.toFixed(2)}</p>
+        <p>(Weight not counted)</p>
+      `;
+    }
+  }
+
+  // ✅ Final Output
   room.querySelector('.output-details').innerHTML = output +
-    `<p><strong>Total Room Cost:</strong> ₹${totalCost.toFixed(2)}</p>
+    `<p><strong>Total Room Area:</strong> ${totalArea.toFixed(2)} sq.ft</p>
+     <p><strong>Total Room Cost:</strong> ₹${totalCost.toFixed(2)}</p>
      <p><strong>Total Room Weight:</strong> ${totalWeight.toFixed(2)} kg</p>`;
 }
 function finalSummaryCalculation() {
@@ -324,24 +370,31 @@ function finalSummaryCalculation() {
     });
 
     const highlightBox = room.querySelector(".highlight-tile-inputs");
-    if (highlightBox && highlightBox.style.display !== 'none') {
-      const tileKey = highlightBox.querySelector('.highlight-tileSize')?.value;
-      const spec = tileSpecs[tileKey];
-      const numTiles = parseInt(highlightBox.querySelector('.highlight-count')?.value);
-      const pricePerTile = parseFloat(highlightBox.querySelector('.highlight-price')?.value);
-      if (!isNaN(numTiles) && !isNaN(pricePerTile)) {
-        const weightPerTile = spec.weight / spec.pcs;
-        const cost = numTiles * pricePerTile;
-        const weight = numTiles * weightPerTile;
-        highlightContent = `
-          <tr><td>Tile Size</td><td>${tileKey}</td></tr>
-          <tr><td>Number of Tiles</td><td>${numTiles}</td></tr>
-          <tr><td>Price per Tile</td><td>₹${pricePerTile.toFixed(2)}</td></tr>
-          <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
-        roomCost += cost;
-        roomWeight += weight;
-      }
-    }
+if (highlightBox && highlightBox.style.display !== 'none') {
+  const tileKey = highlightBox.querySelector('.highlight-tileSize')?.value;
+  const spec = tileSpecs[tileKey];
+  const numTiles = parseInt(highlightBox.querySelector('.highlight-count')?.value);
+  const pricePerSqft = parseFloat(highlightBox.querySelector('.highlight-price')?.value);
+
+  if (!isNaN(numTiles) && !isNaN(pricePerSqft) && spec) {
+    const area = (numTiles / spec.pcs) * spec.coverage;
+    const cost = area * pricePerSqft;
+    const weight = numTiles * (spec.weight / spec.pcs);
+
+    highlightContent = `
+      <tr><td>Tile Size</td><td>${tileKey}</td></tr>
+      <tr><td>Area</td><td>${area.toFixed(2)} sq.ft</td></tr>
+      <tr><td>Number of Tiles</td><td>${numTiles}</td></tr>
+      <tr><td>Price per Sq.ft</td><td>₹${pricePerSqft.toFixed(2)}</td></tr>
+      <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>
+    `;
+
+    roomArea += area;
+    roomCost += cost;
+    roomWeight += weight;
+  }
+}
+
 
     if (floorContent || wallContent || highlightContent) {
       let sectionTable = `
@@ -467,135 +520,187 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function calculateTotalFloor() {
-  const floorChecked = document.getElementById("floorCheckbox").checked;
-  const sideCuttingChecked = document.getElementById("sideCuttingCheckbox").checked;
+  const useDirect = document.getElementById("useDirectSqftCheckbox").checked;
 
-  let outputHTML = "";
+  const directSqft = parseFloat(document.getElementById("directTotalSqft").value);
+  const directTileKey = document.getElementById("directSqftTileSize").value;
+  const directPrice = parseFloat(document.getElementById("directSqftPrice").value);
 
-  // Clear old data
-  window.totalFloorData = null;
-  window.sideCuttingData = null;
+  const length = parseFloat(document.getElementById("totalFloorLength").value);
+  const width = parseFloat(document.getElementById("totalFloorWidth").value);
+  const tileKey = document.getElementById("floorTileSize").value;
+  const price = parseFloat(document.getElementById("floorPrice").value);
 
-  if (!floorChecked && !sideCuttingChecked) {
-    alert("Please select at least Floor or Side Cutting.");
-    return;
-  }
+  const sideFeet = parseFloat(document.getElementById("sideCuttingRunningFeet").value);
+  const sideTileKey = document.getElementById("sideTileSize").value;
+  const sidePrice = parseFloat(document.getElementById("sidePrice").value);
 
-  // If Floor is checked
-  if (floorChecked) {
-    const length = parseFloat(document.getElementById("totalFloorLength").value);
-    const width = parseFloat(document.getElementById("totalFloorWidth").value);
-    const tileKey = document.getElementById("floorTileSize").value;
-    const price = parseFloat(document.getElementById("floorPrice").value);
+  let output = '';
+  let totalCost = 0;
+  let totalArea = 0;
+  let totalWeight = 0;
+  let totalBoxes = 0;
 
-    const spec = tileSpecs[tileKey];
+  // ✅ DIRECT Sq.Ft MODE
+  if (useDirect && !isNaN(directSqft) && !isNaN(directPrice)) {
+    const spec = tileSpecs[directTileKey];
+    const boxes = spec ? Math.ceil(directSqft / spec.coverage) : 0;
+    const weight = spec ? boxes * spec.weight : 0;
+    const cost = directSqft * directPrice;
 
-    if (isNaN(length) || isNaN(width) || isNaN(price)) {
-      alert("Please enter valid length, width, and price for Floor.");
-      return;
-    }
+    output += `<h4>🧱 Direct Total Sq.Ft</h4>
+               <p>Total Area: ${directSqft.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${boxes}</p>
+               <p>Price per Sq.ft: ₹${directPrice.toFixed(2)}</p>
+               <p>Total Cost: ₹${cost.toFixed(2)}</p>
+               <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
 
-    const area = length * width;
-    const tilesPerRow = Math.ceil(length / spec.w);
-    const rows = Math.ceil(width / spec.h);
-    const totalTiles = tilesPerRow * rows;
-    const totalBoxes = Math.ceil(totalTiles / spec.pcs);
-    const totalSqFt = totalBoxes * spec.coverage;
-    const cost = totalSqFt * price;
-    const weight = totalBoxes * spec.weight;
+    totalArea = directSqft;
+    totalBoxes = boxes;
+    totalWeight = weight;
+    totalCost = cost;
 
     window.totalFloorData = {
-      length,
-      width,
-      area,
-      tileKey,
-      price,
-      totalBoxes,
-      totalSqFt,
+      mode: "direct",
+      area: directSqft,
+      totalBoxes: boxes,
+      price: directPrice,
       cost,
       weight
     };
-
-    outputHTML += `
-      <h5>🧱 Floor Summary</h5>
-      <p><strong>Area:</strong> ${area.toFixed(2)} sq.ft</p>
-      <p><strong>Tile Size:</strong> ${tileKey}</p>
-      <p><strong>Total Boxes:</strong> ${totalBoxes}</p>
-      <p><strong>Price per Sq.ft:</strong> ₹${price.toFixed(2)}</p>
-      <p><strong>Total Cost:</strong> ₹${cost.toFixed(2)}</p>
-      <p><strong>Total Weight:</strong> ${weight.toFixed(2)} kg</p>
-    `;
   }
 
-  // If Side Cutting is checked
-  if (sideCuttingChecked) {
-    const runningFeet = parseFloat(document.getElementById("sideCuttingRunningFeet").value);
-    const tileKey = document.getElementById("sideTileSize").value;
-    const price = parseFloat(document.getElementById("sidePrice").value);
-
+  // ✅ LENGTH × WIDTH MODE
+  else if (!useDirect && !isNaN(length) && !isNaN(width) && !isNaN(price)) {
+    const area = length * width;
     const spec = tileSpecs[tileKey];
+    const boxes = Math.ceil(area / spec.coverage);
+    const cost = area * price;
+    const weight = boxes * spec.weight;
 
-    if (isNaN(runningFeet) || isNaN(price)) {
-      alert("Please enter valid Running Feet and Price for Side Cutting.");
-      return;
-    }
+    output += `<h4>🧱 Floor (Length × Width)</h4>
+               <p>Area: ${area.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${boxes}</p>
+               <p>Price per Sq.ft: ₹${price.toFixed(2)}</p>
+               <p>Total Cost: ₹${cost.toFixed(2)}</p>
+               <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
 
-    const runningFeetPerBox = 40;
-    const totalBoxes = Math.ceil(runningFeet / runningFeetPerBox);
-    const totalSqFt = totalBoxes * spec.coverage;
-    const cost = totalSqFt * price;
-    const weight = totalBoxes * spec.weight;
+    totalArea = area;
+    totalBoxes = boxes;
+    totalWeight = weight;
+    totalCost = cost;
+
+    window.totalFloorData = {
+      mode: "lengthWidth",
+      area,
+      totalBoxes: boxes,
+      price,
+      cost,
+      weight
+    };
+  }
+
+  // ✅ SIDE CUTTING — ORIGINAL LOGIC (unchanged)
+  if (!isNaN(sideFeet) && !isNaN(sidePrice) && sideTileKey) {
+    const spec = tileSpecs[sideTileKey];
+    const sideArea = sideFeet * 1; // running feet treated as 1 ft width
+    const sideBoxes = Math.ceil(sideArea / spec.coverage);
+    const sideCost = sideArea * sidePrice;
+    const sideWeight = sideBoxes * spec.weight;
+
+    output += `<h4>✂️ Side Cutting</h4>
+               <p>Running Feet: ${sideFeet}</p>
+               <p>Total Area: ${sideArea.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${sideBoxes}</p>
+               <p>Price per Sq.ft: ₹${sidePrice.toFixed(2)}</p>
+               <p>Total Cost: ₹${sideCost.toFixed(2)}</p>
+               <p>Total Weight: ${sideWeight.toFixed(2)} kg</p>`;
+
+    totalCost += sideCost;
+    totalWeight += sideWeight;
 
     window.sideCuttingData = {
-      runningFeet,
-      tileKey,
-      price,
-      totalBoxes,
-      totalSqFt,
-      cost,
-      weight
+      runningFeet: sideFeet,
+      totalSqFt: sideArea,
+      totalBoxes: sideBoxes,
+      price: sidePrice,
+      cost: sideCost,
+      weight: sideWeight
     };
-
-    outputHTML += `
-      <h5>🧱 Side Cutting Summary</h5>
-      <p><strong>Running Feet:</strong> ${runningFeet} ft</p>
-      <p><strong>Tile Size:</strong> ${tileKey}</p>
-      <p><strong>Total Boxes:</strong> ${totalBoxes}</p>
-      <p><strong>Price per Sq.ft:</strong> ₹${price.toFixed(2)}</p>
-      <p><strong>Total Cost:</strong> ₹${cost.toFixed(2)}</p>
-      <p><strong>Total Weight:</strong> ${weight.toFixed(2)} kg</p>
-    `;
   }
 
-  document.getElementById("totalFloorOutput").innerHTML = outputHTML;
-}
+  output += `<hr>
+             <p><strong>Total Floor Weight:</strong> ${totalWeight.toFixed(2)} kg</p>
+             <p><strong>Total Floor Cost:</strong> ₹${totalCost.toFixed(2)}</p>`;
 
+  document.getElementById("totalFloorOutput").innerHTML = output;
+}
 function toggleTotalFloorInputs() {
   const floorInputs = document.getElementById("floorInputs");
   const sideCuttingInputs = document.getElementById("sideCuttingInputs");
-  const floorChecked = document.getElementById("floorCheckbox").checked;
-  const sideCuttingChecked = document.getElementById("sideCuttingCheckbox").checked;
-  const tileSizeSelect = document.getElementById("totalFloorTileSize");
 
-  // Toggle inputs visibility
-  floorInputs.style.display = floorChecked ? "block" : "none";
-  sideCuttingInputs.style.display = sideCuttingChecked ? "block" : "none";
+  const floorCheckbox = document.getElementById("floorCheckbox");
+  const sideCuttingCheckbox = document.getElementById("sideCuttingCheckbox");
+  const directSqftCheckbox = document.getElementById("useDirectSqftCheckbox");
 
-  // Update tile size options
-  if (sideCuttingChecked) {
-    // Only 2x2 and 2x4
+  // If Total Sq.Ft checkbox is checked, auto-uncheck Floor
+  if (directSqftCheckbox.checked && floorCheckbox.checked) {
+    floorCheckbox.checked = false;
+  }
+
+  // Toggle visibility
+  floorInputs.style.display = floorCheckbox.checked ? "block" : "none";
+  sideCuttingInputs.style.display = sideCuttingCheckbox.checked ? "block" : "none";
+
+  // Clear values if unchecked
+  if (!floorCheckbox.checked) {
+    document.getElementById("totalFloorLength").value = "";
+    document.getElementById("totalFloorWidth").value = "";
+    document.getElementById("floorPrice").value = "";
+    document.getElementById("floorTileSize").selectedIndex = 0;
+  }
+
+  if (!sideCuttingCheckbox.checked) {
+    document.getElementById("sideCuttingRunningFeet").value = "";
+    document.getElementById("sidePrice").value = "";
+    document.getElementById("sideTileSize").selectedIndex = 0;
+    delete window.sideCuttingData;
+  }
+
+  if (!directSqftCheckbox.checked) {
+    document.getElementById("directTotalSqft").value = "";
+    document.getElementById("directSqftPrice").value = "";
+    document.getElementById("directSqftTileSize").selectedIndex = 0;
+  }
+
+  // Clear output if all unchecked
+  if (!floorCheckbox.checked && !sideCuttingCheckbox.checked && !directSqftCheckbox.checked) {
+    document.getElementById("totalFloorOutput").innerHTML = "";
+    delete window.totalFloorData;
+  }
+
+  // Adjust dropdown options based on side cutting
+  const tileSizeSelect = document.getElementById("floorTileSize");
+  if (sideCuttingCheckbox.checked) {
     tileSizeSelect.innerHTML = `
       <option value="4">2 x 2</option>
       <option value="8">2 x 4</option>
     `;
   } else {
-    // Show all options again
     tileSizeSelect.innerHTML = `
       <option value="1">1 x 1</option>
+      <option value="1x1_9">1 x 1 (9)</option>
+      <option value="4x2_3">4 x 2 (3)</option>
       <option value="2.25">16 x 16</option>
       <option value="4">2 x 2</option>
-      <option value="8">2 x 4</option>
+      <option value="8">4 x 2</option>
       <option value="2.75x5.25">2.75 x 5.25</option>
     `;
   }
+}
+
+function toggleTotalSqftInputs() {
+  const isChecked = document.getElementById("useDirectSqftCheckbox").checked;
+  document.getElementById("floorInputs").style.display = isChecked ? "none" : "block";
+  document.getElementById("directSqftInputs").style.display = isChecked ? "block" : "none";
 }

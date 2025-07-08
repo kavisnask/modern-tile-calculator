@@ -10,6 +10,7 @@
   <div class="container">
     <h1>SMART TILE CALCULATOR</h1>
     <br>
+
     <!-- Toast message -->
     <div id="toast" class="toast">Logout Successful ✅</div>
 
@@ -23,18 +24,23 @@
       <label><input type="checkbox" value="Balcony"> Balcony</label>
       <label><input type="checkbox" value="Elevation"> Elevation</label>
       <label><input type="checkbox" value="Parking"> Parking</label>
-      <label><input type="checkbox" value="Total Floor Only"> Total Floor Only</label>
+      <label><input type="checkbox" value="Total Floor Only"> Total Floor</label>
       <br>
       <button onclick="confirmAreaSelection()">Calculate Area(s)</button>
     </div>
-
- <div id="totalFloorInputs" style="display:none;" class="area-section">
+<div id="totalFloorInputs" style="display:none;" class="area-section">
   <h3>Total Floor Calculation</h3>
   <label><input type="checkbox" id="floorCheckbox" checked onchange="toggleTotalFloorInputs()"> Floor</label>
   <label><input type="checkbox" id="sideCuttingCheckbox" onchange="toggleTotalFloorInputs()"> Side Cutting</label>
 
+  <!-- Toggle Total SqFt Option -->
+  <label style="margin-top: 10px;">
+    <input type="checkbox" id="useDirectSqftCheckbox" onchange="toggleTotalSqftInputs()"> Total Sq.Ft Only
+  </label>
+
   <!-- Floor Inputs -->
   <div id="floorInputs">
+    <h4>Floor Area by Length & Width</h4>
     <input type="number" id="totalFloorLength" placeholder="Length (ft)">
     <input type="number" id="totalFloorWidth" placeholder="Width (ft)">
     <select id="floorTileSize">
@@ -43,12 +49,32 @@
       <option value="4">2 x 2</option>
       <option value="8">4 x 2</option>
       <option value="2.75x5.25">2.75 x 5.25</option>
+<option value="1x1_9">1 x 1 (9)</option> <!-- NEW -->
+  <option value="4x2_3">4 x 2 (3)</option> <!-- NEW -->
     </select>
     <input type="number" id="floorPrice" placeholder="Price per Sq.ft (₹)">
   </div>
 
+  <!-- Direct Sq.Ft Inputs -->
+  <div id="directSqftInputs" style="display:none;">
+    <h4>Total Sq.Ft Directly</h4>
+    <input type="number" id="directTotalSqft" placeholder="Total Sq.Ft">
+    <select id="directSqftTileSize">
+      <option value="1">1 x 1</option>
+      <option value="2.25">16 x 16</option>
+      <option value="4">2 x 2</option>
+      <option value="8">4 x 2</option>
+      <option value="2.75x5.25">2.75 x 5.25</option>
+<option value="1x1_9">1 x 1 (9)</option> <!-- NEW -->
+  <option value="4x2_3">4 x 2 (3)</option> <!-- NEW -->
+    </select>
+    <input type="number" id="directSqftPrice" placeholder="Price per Sq.Ft (₹)">
+    <p style="font-size: 13px; color: gray;">(This will override Length × Width)</p>
+  </div>
+
   <!-- Side Cutting Inputs -->
   <div id="sideCuttingInputs" style="display:none;">
+    <h4>Side Cutting</h4>
     <input type="number" id="sideCuttingRunningFeet" placeholder="Running Feet">
     <select id="sideTileSize">
       <option value="4">2 x 2</option>
@@ -66,11 +92,11 @@
     <div id="roomInputs"></div>
 
     <div style="display: flex; gap: 10px; margin-top: 20px;">
-  <button onclick="finalSummaryCalculation()">🏁 Final Summary Calculation</button>
-  <div id="printButtonWrapper" style="display: none;">
-    <button onclick="printEstimate()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer;">🖨️ Print Estimate</button>
-  </div>
-</div>
+      <button onclick="finalSummaryCalculation()">🏁 Final Summary Calculation</button>
+      <div id="printButtonWrapper" style="display: none;">
+        <button onclick="printEstimate()" style="background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer;">🖨️ Print Estimate</button>
+      </div>
+    </div>
 
     <!-- Summary Output -->
     <pre id="grandSummaryOutput" style="background:#fefefe; padding:15px; border:1px solid #ccc; margin-top:20px; white-space:pre-wrap;"></pre>
