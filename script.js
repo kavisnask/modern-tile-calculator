@@ -96,7 +96,10 @@ function generateRooms(area, count) {
           <option value="2.75x5.25">2.75 x 5.25</option>
         </select>
         <input type="number" class="floor-price" placeholder="Price per Sq.ft (₹)">
-      </div>
+<div class="design-input-group">
+  <label for="floor-design">Design Number</label>
+  <input type="text" class="floor-design" placeholder="Enter Design Number (optional)">
+</div>      </div>
 
       <div class="wall-tile-inputs" style="display:none;">
         <h5>Wall Tile Details</h5>
@@ -111,6 +114,10 @@ function generateRooms(area, count) {
         <input type="number" class="wall-dark" placeholder="Dark Tile Rows">
         <input type="number" class="wall-highlight" placeholder="Highlight Tile Rows">
         <input type="number" class="wall-light" placeholder="Light Tile Rows">
+<div class="design-input-group">
+  <label for="wall-design">Design Number</label>
+  <input type="text" class="wall-design" placeholder="Enter Design Number (optional)">
+</div>
       </div>
 
       <div class="highlight-tile-inputs" style="display:none;">
@@ -122,6 +129,10 @@ function generateRooms(area, count) {
         </select>
         <input type="number" class="highlight-count" placeholder="Number of Tiles">
         <input type="number" class="highlight-price" placeholder="Price per Tile (₹)">
+<div class="design-input-group">
+  <label for="highlight-design">Design Number</label>
+  <input type="text" class="highlight-design" placeholder="Enter Design Number (optional)">
+</div>
       </div>
 
       <button onclick="calculateRoomDetails(this)">📋 Room ${i} Calculation</button>
@@ -150,6 +161,9 @@ function calculateRoomDetails(button) {
       const spec = tileSpecs[tileKey];
       if (!spec) return;
 
+      const designNumber = box.querySelector(`.${type}-design`)?.value || '';
+      const designText = designNumber ? ` (Design Number: ${designNumber})` : '';
+
       if (type === "highlight") {
         const numTiles = parseInt(box.querySelector('.highlight-count')?.value);
         const pricePerTile = parseFloat(box.querySelector('.highlight-price')?.value);
@@ -163,7 +177,7 @@ function calculateRoomDetails(button) {
           totalCost += cost;
           totalWeight += weight;
           output += `
-            <h5>🌟 Highlight Tiles</h5>
+            <h5>🌟 Highlight Tiles${designText}</h5>
             <p>Tile Size: ${tileKey}</p>
             <p>Number of Tiles: ${numTiles}</p>
             <p>Total Sq.ft: ${area.toFixed(2)} sq.ft</p>
@@ -178,17 +192,7 @@ function calculateRoomDetails(button) {
         const p = parseFloat(box.querySelector(`.${type}-price`)?.value);
         if (!isNaN(w) && !isNaN(h) && !isNaN(p)) {
           let tilesPerRow, rows;
-
-          if (type === "wall") {
-            // Convert dimensions to inches for accurate calculation
-            const widthInches = w * 12;
-            const heightInches = h * 12;
-            const tileWidthInches = spec.w * 12;
-            const tileHeightInches = spec.h * 12;
-
-            tilesPerRow = Math.ceil(widthInches / tileWidthInches);
-            rows = Math.ceil(heightInches / tileHeightInches);
-          } else if (tileKey === "2.75x5.25") {
+          if (tileKey === "2.75x5.25") {
             tilesPerRow = Math.ceil(w / spec.h);
             rows = Math.ceil(h / spec.w);
           } else {
@@ -224,9 +228,9 @@ function calculateRoomDetails(button) {
             totalArea += totalWallSqFt;
 
             output += `
-              <h5>🧱 Wall Tile</h5>
-              <p>Tiles along Height : ${rows}</p>
+              <h5>🧱 Wall Tile${designText}</h5>
               <p>Tiles along Width: ${tilesPerRow}</p>
+              <p>Tiles along Height: ${rows}</p>
               <p>Dark Tile Rows: ${dark} → Boxes: ${darkBoxes}</p>
               <p>Highlight Tile Rows: ${highlight} → Boxes: ${highlightBoxes}</p>
               <p>Light Tile Rows: ${light} → Boxes: ${lightBoxes}</p>
@@ -240,7 +244,7 @@ function calculateRoomDetails(button) {
             `;
           } else {
             output += `
-              <h5>🧱 Floor Tile</h5>
+              <h5>🧱 Floor Tile${designText}</h5>
               <p>Tiles along Width: ${tilesPerRow}</p>
               <p>Tiles along Length: ${rows}</p>
               <p>Total Boxes: ${totalBoxes}</p>
@@ -259,8 +263,7 @@ function calculateRoomDetails(button) {
 
   room.querySelector('.output-details').innerHTML = output +
     `<p><strong>Total Room Cost:</strong> ₹${totalCost.toFixed(2)}</p>
-     <p><strong>Total Room Weight:</strong> ${totalWeight.toFixed(2)} kg</p>
-     `;
+     <p><strong>Total Room Weight:</strong> ${totalWeight.toFixed(2)} kg</p>`;
 }
 
 function finalSummaryCalculation() {
@@ -283,141 +286,138 @@ function finalSummaryCalculation() {
       </div>
     </div>`;
 
-const allRooms = document.querySelectorAll(".room-section");
-allRooms.forEach(room => {
-  let roomCost = 0;
-  let roomWeight = 0;
-  let roomArea = 0;
-  const roomTitle = room.querySelector('h4')?.innerText || "";
-  let floorContent = '', wallContent = '', highlightContent = '';
+  const allRooms = document.querySelectorAll(".room-section");
+  allRooms.forEach(room => {
+    let roomCost = 0;
+    let roomWeight = 0;
+    let roomArea = 0;
+    const roomTitle = room.querySelector('h4')?.innerText || "";
+    let floorContent = '', wallContent = '', highlightContent = '';
 
-  ["floor", "wall"].forEach(type => {
-    const box = room.querySelector(`.${type}-tile-inputs`);
-    if (box && box.style.display !== 'none') {
-      const w = parseFloat(box.querySelector(`.${type}-width`)?.value);
-      const h = parseFloat(box.querySelector(`.${type}-height`)?.value);
-      const tileKey = box.querySelector(`.${type}-tileSize`)?.value;
-      const p = parseFloat(box.querySelector(`.${type}-price`)?.value);
-      if (!isNaN(w) && !isNaN(h) && !isNaN(p)) {
-        const spec = tileSpecs[tileKey];
-        const tilesPerRow = Math.ceil(w / spec.w);
-        const rows = Math.ceil(h / spec.h);
-        const totalTiles = tilesPerRow * rows;
+    ["floor", "wall"].forEach(type => {
+      const box = room.querySelector(`.${type}-tile-inputs`);
+      if (box && box.style.display !== 'none') {
+        const w = parseFloat(box.querySelector(`.${type}-width`)?.value);
+        const h = parseFloat(box.querySelector(`.${type}-height`)?.value);
+        const tileKey = box.querySelector(`.${type}-tileSize`)?.value;
+        const p = parseFloat(box.querySelector(`.${type}-price`)?.value);
+        const design = box.querySelector(`.${type}-design`)?.value || '';
+        const designText = design ? ` (Design Number: ${design})` : '';
 
-        if (type === "wall") {
-          const dark = parseInt(box.querySelector(`.${type}-dark`)?.value) || 0;
-          const highlight = parseInt(box.querySelector(`.${type}-highlight`)?.value) || 0;
-          const lightInput = box.querySelector(`.${type}-light`)?.value;
-          const light = lightInput !== "" ? parseInt(lightInput) : Math.max(0, rows - (dark + highlight));
-          const darkBoxes = Math.ceil((dark * tilesPerRow) / spec.pcs);
-          const highlightBoxes = Math.ceil((highlight * tilesPerRow) / spec.pcs);
-          const lightBoxes = Math.ceil((light * tilesPerRow) / spec.pcs);
-          const totalBoxes = darkBoxes + highlightBoxes + lightBoxes;
-          const totalSqFt = totalBoxes * spec.coverage;
+        if (!isNaN(w) && !isNaN(h) && !isNaN(p)) {
+          const spec = tileSpecs[tileKey];
+          const tilesPerRow = Math.ceil(w / spec.w);
+          const rows = Math.ceil(h / spec.h);
+          const totalTiles = tilesPerRow * rows;
 
-          const cost = totalSqFt * p;
-          const weight = totalBoxes * spec.weight;
+          if (type === "wall") {
+            const dark = parseInt(box.querySelector(`.${type}-dark`)?.value) || 0;
+            const highlight = parseInt(box.querySelector(`.${type}-highlight`)?.value) || 0;
+            const lightInput = box.querySelector(`.${type}-light`)?.value;
+            const light = lightInput !== "" ? parseInt(lightInput) : Math.max(0, rows - (dark + highlight));
+            const darkBoxes = Math.ceil((dark * tilesPerRow) / spec.pcs);
+            const highlightBoxes = Math.ceil((highlight * tilesPerRow) / spec.pcs);
+            const lightBoxes = Math.ceil((light * tilesPerRow) / spec.pcs);
+            const totalBoxes = darkBoxes + highlightBoxes + lightBoxes;
+            const totalSqFt = totalBoxes * spec.coverage;
 
-          roomCost += cost;
-          roomWeight += weight;
-          roomArea += totalSqFt;
+            const cost = totalSqFt * p;
+            const weight = totalBoxes * spec.weight;
 
-          wallContent = `
-            <tr><td>Tile Width</td><td>${w}</td></tr>
-            <tr><td>Tile Length</td><td>${h}</td></tr>
-            <tr><td><b>Dark Tile</b></td><td><b>Boxes: ${darkBoxes}</b></td></tr>
-            <tr><td><b>Highlight Tile</b></td><td><b>Boxes: ${highlightBoxes}</b></td></tr>
-            <tr><td><b>Light Tile</b></td><td><b>Boxes: ${lightBoxes}</b></td></tr>
-            <tr><td>Total Box</td><td>${totalBoxes}</td></tr>
-            <tr><td>Total Sq.ft</td><td>${totalSqFt.toFixed(2)}</td></tr>
-            <tr><td>Price Per Box</td><td>₹${p.toFixed(2)}</td></tr>
-            <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
-        } else {
-          const totalBoxes = Math.ceil(totalTiles / spec.pcs);
-          const totalSqFt = totalBoxes * spec.coverage;
-          const cost = totalSqFt * p;
-          const weight = totalBoxes * spec.weight;
+            roomCost += cost;
+            roomWeight += weight;
+            roomArea += totalSqFt;
 
-          roomCost += cost;
-          roomWeight += weight;
-          roomArea += totalSqFt;
+            wallContent = `
+              <tr><td colspan="2"><b>Wall Tile${designText}</b></td></tr>
+              <tr><td>Tile Width</td><td>${w}</td></tr>
+              <tr><td>Tile Length</td><td>${h}</td></tr>
+              <tr><td><b>Dark Tile</b></td><td><b>Boxes: ${darkBoxes}</b></td></tr>
+              <tr><td><b>Highlight Tile</b></td><td><b>Boxes: ${highlightBoxes}</b></td></tr>
+              <tr><td><b>Light Tile</b></td><td><b>Boxes: ${lightBoxes}</b></td></tr>
+              <tr><td>Total Box</td><td>${totalBoxes}</td></tr>
+              <tr><td>Total Sq.ft</td><td>${totalSqFt.toFixed(2)}</td></tr>
+              <tr><td>Price Per Box</td><td>₹${p.toFixed(2)}</td></tr>
+              <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
+          } else {
+            const totalBoxes = Math.ceil(totalTiles / spec.pcs);
+            const totalSqFt = totalBoxes * spec.coverage;
+            const cost = totalSqFt * p;
+            const weight = totalBoxes * spec.weight;
 
-          floorContent = `
-            <tr><td>Tile Width</td><td>${w}</td></tr>
-            <tr><td>Tile Length</td><td>${h}</td></tr>
-            <tr><td>Total Box</td><td>${totalBoxes}</td></tr>
-            <tr><td>Total Sq.ft</td><td>${totalSqFt.toFixed(2)}</td></tr>
-            <tr><td>Price Per Box</td><td>₹${p.toFixed(2)}</td></tr>
-            <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
+            roomCost += cost;
+            roomWeight += weight;
+            roomArea += totalSqFt;
+
+            floorContent = `
+              <tr><td colspan="2"><b>Floor Tile${designText}</b></td></tr>
+              <tr><td>Tile Width</td><td>${w}</td></tr>
+              <tr><td>Tile Length</td><td>${h}</td></tr>
+              <tr><td>Total Box</td><td>${totalBoxes}</td></tr>
+              <tr><td>Total Sq.ft</td><td>${totalSqFt.toFixed(2)}</td></tr>
+              <tr><td>Price Per Box</td><td>₹${p.toFixed(2)}</td></tr>
+              <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
+          }
         }
       }
+    });
+
+    const highlightBox = room.querySelector(".highlight-tile-inputs");
+    if (highlightBox && highlightBox.style.display !== 'none') {
+      const tileKey = highlightBox.querySelector('.highlight-tileSize')?.value;
+      const spec = tileSpecs[tileKey];
+      const numTiles = parseInt(highlightBox.querySelector('.highlight-count')?.value);
+      const pricePerTile = parseFloat(highlightBox.querySelector('.highlight-price')?.value);
+      const design = highlightBox.querySelector('.highlight-design')?.value || '';
+      const designText = design ? ` (Design Number: ${design})` : '';
+
+      if (!isNaN(numTiles) && !isNaN(pricePerTile)) {
+        const weightPerTile = spec.weight / spec.pcs;
+        const cost = numTiles * pricePerTile;
+        const weight = numTiles * weightPerTile;
+        const area = numTiles * spec.w * spec.h;
+
+        roomCost += cost;
+        roomWeight += weight;
+        roomArea += area;
+
+        highlightContent = `
+          <tr><td colspan="2"><b>Highlight Tile${designText}</b></td></tr>
+          <tr><td>Tile Size</td><td>${tileKey}</td></tr>
+          <tr><td>Number of Tiles</td><td>${numTiles}</td></tr>
+          <tr><td>Total Sq.ft</td><td>${area.toFixed(2)}</td></tr>
+          <tr><td>Price per Tile</td><td>₹${pricePerTile.toFixed(2)}</td></tr>
+          <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
+      }
+    }
+
+    if (floorContent || wallContent || highlightContent) {
+      let sectionTable = `
+        <table border="1" style="width:100%; border-collapse: collapse;">
+          <thead><tr><th colspan="2">AREA - ${roomTitle}</th></tr></thead>
+          <tbody>`;
+
+      if (floorContent) sectionTable += floorContent;
+      if (wallContent) sectionTable += wallContent;
+      if (highlightContent) sectionTable += highlightContent;
+
+      sectionTable += `</tbody></table><br>`;
+      printTables += sectionTable;
+
+      grandTotalArea += roomArea;
+      grandTotalCost += roomCost;
+      grandTotalWeight += roomWeight;
     }
   });
-
-  // Highlight tile area = numTiles × (w × h)
-  const highlightBox = room.querySelector(".highlight-tile-inputs");
-  if (highlightBox && highlightBox.style.display !== 'none') {
-    const tileKey = highlightBox.querySelector('.highlight-tileSize')?.value;
-    const spec = tileSpecs[tileKey];
-    const numTiles = parseInt(highlightBox.querySelector('.highlight-count')?.value);
-    const pricePerTile = parseFloat(highlightBox.querySelector('.highlight-price')?.value);
-
-    if (!isNaN(numTiles) && !isNaN(pricePerTile)) {
-      const weightPerTile = spec.weight / spec.pcs;
-      const cost = numTiles * pricePerTile;
-      const weight = numTiles * weightPerTile;
-      const area = numTiles * spec.w * spec.h;
-
-      roomCost += cost;
-      roomWeight += weight;
-      roomArea += area;
-
-      highlightContent = `
-        <tr><td>Tile Size</td><td>${tileKey}</td></tr>
-        <tr><td>Number of Tiles</td><td>${numTiles}</td></tr>
-        <tr><td>Total Sq.ft</td><td>${area.toFixed(2)}</td></tr>
-        <tr><td>Price per Tile</td><td>₹${pricePerTile.toFixed(2)}</td></tr>
-        <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
-    }
-  }
-
-  // Append to printTables if this room had tile data
-  if (floorContent || wallContent || highlightContent) {
-    let sectionTable = `
-      <table border="1" style="width:100%; border-collapse: collapse;">
-        <thead><tr><th colspan="2">AREA - ${roomTitle}</th></tr></thead>
-        <tbody>`;
-
-    if (floorContent) sectionTable += `<tr><td colspan="2"><b>Floor Tile</b></td></tr>${floorContent}`;
-    if (wallContent) sectionTable += `<tr><td colspan="2"><b>Wall Tile</b></td></tr>${wallContent}`;
-    if (highlightContent) sectionTable += `<tr><td colspan="2"><b>Highlight Tiles</b></td></tr>${highlightContent}`;
-
-    sectionTable += `</tbody></table><br>`;
-    printTables += sectionTable;
-
-    grandTotalArea += roomArea;
-    grandTotalCost += roomCost;
-    grandTotalWeight += roomWeight;
-  }
-});
-
 
   const weightRatePerKg = 0.22;
   let weightCost = Math.ceil((grandTotalWeight * weightRatePerKg) / 10) * 10;
   const tileOnlyCost = grandTotalCost;
   grandTotalCost += weightCost;
 
-// Custom rounding logic:
-// If decimal >= 0.5, round UP
-// Else, round DOWN
-const integerPart = Math.floor(grandTotalCost);
-const decimalPart = grandTotalCost - integerPart;
-let roundedTotal;
-if (decimalPart >= 0.5) {
-  roundedTotal = integerPart + 1;
-} else {
-  roundedTotal = integerPart;
-}
+  const integerPart = Math.floor(grandTotalCost);
+  const decimalPart = grandTotalCost - integerPart;
+  let roundedTotal = decimalPart >= 0.5 ? integerPart + 1 : integerPart;
 
   const grandTable = `
     <table border="1" style="width:100%; border-collapse: collapse;">

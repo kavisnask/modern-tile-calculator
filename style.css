@@ -12,6 +12,38 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+.design-input-group {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.design-input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+  font-size: 14px;
+}
+
+.design-input-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.8px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #fafafa;
+  color: #333;
+  transition: 0.3s ease;
+}
+
+.design-input-group input:focus {
+  border-color: #6a5acd;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 6px rgba(106, 90, 205, 0.4);
+}
+
+
 
 .design-name {
   width: 100%;
