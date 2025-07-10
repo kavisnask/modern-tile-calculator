@@ -12,63 +12,6 @@ body {
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-.design-input-group {
-  margin-top: 12px;
-  margin-bottom: 16px;
-}
-#totalFloorInputs .section-box {
-  background-color: #e9f5ff;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  margin-top: 15px;
-}
-
-#totalFloorInputs input,
-#totalFloorInputs select {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
-
-#totalFloorInputs button {
-  background-color: #1d8ed0;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-
-.design-input-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #333;
-  font-size: 14px;
-}
-
-.design-input-group input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.8px solid #ccc;
-  border-radius: 10px;
-  font-size: 15px;
-  background-color: #fafafa;
-  color: #333;
-  transition: 0.3s ease;
-}
-
-.design-input-group input:focus {
-  border-color: #6a5acd;
-  background-color: #fff;
-  outline: none;
-  box-shadow: 0 0 6px rgba(106, 90, 205, 0.4);
-}
-
-
 
 .design-name {
   width: 100%;
@@ -198,6 +141,36 @@ button:hover {
   border-radius: 8px;
   border-left: 4px solid #f39c12;
 }
+.design-number-wrapper {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.design-number-wrapper label {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.design-number {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+.design-number:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 3px #4CAF50;
+}
+
 
 .output-details {
   background: #ecf0f1;
