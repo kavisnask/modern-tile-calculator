@@ -469,3 +469,121 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   finalBtn.insertAdjacentElement('afterend', printBtn);
 });
+
+function calculateTotalFloor() {
+  const useDirect = document.getElementById("useDirectSqftCheckbox").checked;
+
+  const directSqft = parseFloat(document.getElementById("directTotalSqft").value);
+  const directTileKey = document.getElementById("directSqftTileSize").value;
+  const directPrice = parseFloat(document.getElementById("directSqftPrice").value);
+
+  const length = parseFloat(document.getElementById("totalFloorLength").value);
+  const width = parseFloat(document.getElementById("totalFloorWidth").value);
+  const tileKey = document.getElementById("floorTileSize").value;
+  const price = parseFloat(document.getElementById("floorPrice").value);
+
+  const sideFeet = parseFloat(document.getElementById("sideCuttingRunningFeet").value);
+  const sideTileKey = document.getElementById("sideTileSize").value;
+  const sidePrice = parseFloat(document.getElementById("sidePrice").value);
+
+  let output = '';
+  let totalCost = 0;
+  let totalArea = 0;
+  let totalWeight = 0;
+  let totalBoxes = 0;
+
+  // ✅ DIRECT Sq.Ft MODE
+  if (useDirect && !isNaN(directSqft) && !isNaN(directPrice)) {
+    const spec = tileSpecs[directTileKey];
+    const boxes = spec ? Math.ceil(directSqft / spec.coverage) : 0;
+    const weight = spec ? boxes * spec.weight : 0;
+    const cost = directSqft * directPrice;
+
+    output += `<h4>🧱 Direct Total Sq.Ft</h4>
+               <p>Total Area: ${directSqft.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${boxes}</p>
+               <p>Price per Sq.ft: ₹${directPrice.toFixed(2)}</p>
+               <p>Total Cost: ₹${cost.toFixed(2)}</p>
+               <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
+
+    totalArea = directSqft;
+    totalBoxes = boxes;
+    totalWeight = weight;
+    totalCost = cost;
+
+    window.totalFloorData = {
+      mode: "direct",
+      area: directSqft,
+      totalBoxes: boxes,
+      price: directPrice,
+      cost,
+      weight
+    };
+  }
+
+  // ✅ LENGTH × WIDTH MODE
+  else if (!useDirect && !isNaN(length) && !isNaN(width) && !isNaN(price)) {
+    const area = length * width;
+    const spec = tileSpecs[tileKey];
+    const boxes = Math.ceil(area / spec.coverage);
+    const cost = area * price;
+    const weight = boxes * spec.weight;
+
+    output += `<h4>🧱 Floor (Length × Width)</h4>
+               <p>Area: ${area.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${boxes}</p>
+               <p>Price per Sq.ft: ₹${price.toFixed(2)}</p>
+               <p>Total Cost: ₹${cost.toFixed(2)}</p>
+               <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
+
+    totalArea = area;
+    totalBoxes = boxes;
+    totalWeight = weight;
+    totalCost = cost;
+
+    window.totalFloorData = {
+      mode: "lengthWidth",
+      area,
+      totalBoxes: boxes,
+      price,
+      cost,
+      weight
+    };
+  }
+
+  // ✅ SIDE CUTTING
+  if (!isNaN(sideFeet) && !isNaN(sidePrice) && sideTileKey) {
+    const spec = tileSpecs[sideTileKey];
+    const sideArea = sideFeet * 1;
+    const sideBoxes = Math.ceil(sideArea / spec.coverage);
+    const sideCost = sideArea * sidePrice;
+    const sideWeight = sideBoxes * spec.weight;
+
+    output += `<h4>✂️ Side Cutting</h4>
+               <p>Running Feet: ${sideFeet}</p>
+               <p>Total Area: ${sideArea.toFixed(2)} sq.ft</p>
+               <p>Total Boxes: ${sideBoxes}</p>
+               <p>Price per Sq.ft: ₹${sidePrice.toFixed(2)}</p>
+               <p>Total Cost: ₹${sideCost.toFixed(2)}</p>
+               <p>Total Weight: ${sideWeight.toFixed(2)} kg</p>`;
+
+    totalCost += sideCost;
+    totalWeight += sideWeight;
+
+    window.sideCuttingData = {
+      runningFeet: sideFeet,
+      totalSqFt: sideArea,
+      totalBoxes: sideBoxes,
+      price: sidePrice,
+      cost: sideCost,
+      weight: sideWeight
+    };
+  }
+
+  // ✅ Final Totals
+  output += `<hr>
+             <p><strong>Total Floor Weight:</strong> ${totalWeight.toFixed(2)} kg</p>
+             <p><strong>Total Floor Cost:</strong> ₹${totalCost.toFixed(2)}</p>`;
+
+  document.getElementById("totalFloorOutput").innerHTML = output;
+}

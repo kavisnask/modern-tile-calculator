@@ -16,6 +16,31 @@ body {
   margin-top: 12px;
   margin-bottom: 16px;
 }
+#totalFloorInputs .section-box {
+  background-color: #e9f5ff;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+#totalFloorInputs input,
+#totalFloorInputs select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+#totalFloorInputs button {
+  background-color: #1d8ed0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 
 .design-input-group label {
   display: block;
