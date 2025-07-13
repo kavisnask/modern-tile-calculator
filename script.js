@@ -375,8 +375,6 @@ function finalSummaryCalculation() {
               <tr><td colspan="2" style="text-align: center; font-weight: bold;">          ( Design Number : ${designNumber} )</td></tr>
               <tr><td>Tile Width</td><td>${w}</td></tr>
               <tr><td>Tile Length</td><td>${h}</td></tr>
-              <tr><td>Tiles along Width</td><td>${displayWidth}</td></tr>
-              <tr><td>Tiles along Length</td><td>${displayLength}</td></tr>
               <tr><td><b>Dark Tile</b></td><td><b>Boxes: ${darkBoxes}</b></td></tr>
               <tr><td><b>Highlight Tile</b></td><td><b>Boxes: ${highlightBoxes}</b></td></tr>
               <tr><td><b>Light Tile</b></td><td><b>Boxes: ${lightBoxes}</b></td></tr>
@@ -395,8 +393,6 @@ function finalSummaryCalculation() {
               <tr><td colspan="2" style="text-align: center; font-weight: bold;">          ( Design Number : ${designNumber} )</td></tr>
               <tr><td>Tile Width</td><td>${w}</td></tr>
               <tr><td>Tile Length</td><td>${h}</td></tr>
-              <tr><td>Tiles along Width</td><td>${displayWidth}</td></tr>
-              <tr><td>Tiles along Length</td><td>${displayLength}</td></tr>
               <tr><td>Total Box</td><td>${totalBoxes}</td></tr>
               <tr><td>Price Per SqFt</td><td>₹${p.toFixed(2)}</td></tr>
               <tr><td>Total Cost</td><td>₹${cost.toFixed(2)}</td></tr>`;
@@ -528,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
   printBtn.style = 'margin-left: 10px; padding:10px 20px;font-size:16px;cursor:pointer;background:#4CAF50;color:white;border:none;border-radius:5px;';
   printBtn.onclick = () => {
     const content = document.getElementById("grandSummaryOutput").innerHTML;
-    const twoCopies = `<div style="page-break-after: always;">${content}</div><div>${content}</div>`;
+    const twoCopies = `<div style="page-break-after: always;">${content}</div><div></div>`;
     const printWindow = window.open('', '', 'width=800,height=1000');
     printWindow.document.write(`
   <html>
