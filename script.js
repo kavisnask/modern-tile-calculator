@@ -531,7 +531,10 @@ document.addEventListener('DOMContentLoaded', () => {
   printBtn.style = 'margin-left: 10px; padding:10px 20px;font-size:16px;cursor:pointer;background:#4CAF50;color:white;border:none;border-radius:5px;';
   printBtn.onclick = () => {
     const content = document.getElementById("grandSummaryOutput").innerHTML;
-    const twoCopies = `<div style="page-break-after: always;">${content}</div><div></div>`;
+
+    // ✅ Fixed: second copy added
+    const twoCopies = `<div style="page-break-after: always;">${content}</div><div>${content}</div>`;
+
     const printWindow = window.open('', '', 'width=800,height=1000');
     printWindow.document.write(`
   <html>
