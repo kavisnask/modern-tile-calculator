@@ -208,13 +208,16 @@ function calculateRoomDetails(button) {
 
         if (!isNaN(w) && !isNaN(h) && !isNaN(p)) {
           let tilesPerRow, rows;
-          if (tileKey === "2.75x5.25") {
-            tilesPerRow = Math.ceil(h / spec.w);
-            rows = Math.ceil(w / spec.h);
-          } else {
-            tilesPerRow = Math.ceil(w / spec.w);
-            rows = Math.ceil(h / spec.h);
-          }
+         if (tileKey === "2.25") {
+  tilesPerRow = Math.ceil((w * 12) / 16);
+  rows = Math.ceil((h * 12) / 16);
+} else if (tileKey === "2.75x5.25") {
+  tilesPerRow = Math.ceil((w * 12) / 63);
+  rows = Math.ceil((h * 12) / 31.5);
+} else {
+  tilesPerRow = Math.ceil(w / spec.w);
+  rows = Math.ceil(h / spec.h);
+}
 
           const displayWidth = tileKey === "2.75x5.25" ? rows : tilesPerRow;
           const displayLength = tileKey === "2.75x5.25" ? tilesPerRow : rows;
@@ -345,13 +348,17 @@ function finalSummaryCalculation() {
           const spec = tileSpecs[tileKey];
           let tilesPerRow, rows;
 
-          if (tileKey === "2.75x5.25") {
-            tilesPerRow = Math.ceil(h / spec.w);
-            rows = Math.ceil(w / spec.h);
-          } else {
-            tilesPerRow = Math.ceil(w / spec.w);
-            rows = Math.ceil(h / spec.h);
-          }
+          if (tileKey === "2.25") {
+  tilesPerRow = Math.ceil((w * 12) / 16);
+  rows = Math.ceil((h * 12) / 16);
+} else if (tileKey === "2.75x5.25") {
+  tilesPerRow = Math.ceil((w * 12) / 63);
+  rows = Math.ceil((h * 12) / 31.5);
+} else {
+  tilesPerRow = Math.ceil(w / spec.w);
+  rows = Math.ceil(h / spec.h);
+}
+
 
           const displayWidth = tileKey === "2.75x5.25" ? rows : tilesPerRow;
           const displayLength = tileKey === "2.75x5.25" ? tilesPerRow : rows;
