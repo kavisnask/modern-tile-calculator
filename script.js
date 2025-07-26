@@ -577,34 +577,38 @@ function calculateTotalFloor() {
   let totalWeight = 0;
   let totalBoxes = 0;
 
-  // ✅ DIRECT Sq.Ft MODE
-  if (useDirect && !isNaN(directSqft) && !isNaN(directPrice)) {
-    const spec = tileSpecs[directTileKey];
-    const boxes = spec ? Math.ceil(directSqft / spec.coverage) : 0;
-    const weight = spec ? boxes * spec.weight : 0;
-    const cost = directSqft * directPrice;
+ // ✅ DIRECT Sq.Ft MODE (user enters price per sq.ft)
+if (useDirect && !isNaN(directSqft) && !isNaN(directPrice)) {
+  const spec = tileSpecs[directTileKey];
+  const boxes = spec ? Math.ceil(directSqft / spec.coverage) : 0;
+  const pricePerBox = spec ? directPrice * spec.coverage : 0; // ✅ Convert sq.ft to box price
+  const cost = boxes * pricePerBox;
+  const weight = boxes * spec.weight;
 
-    output += `<h4>🧱 Direct Total Sq.Ft</h4>
-               <p>Total Area: ${directSqft.toFixed(2)} sq.ft</p>
-               <p>Total Boxes: ${boxes}</p>
-               <p>Price per Sq.ft: ₹${directPrice.toFixed(2)}</p>
-               <p>Total Cost: ₹${cost.toFixed(2)}</p>
-               <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
+  output += `<h4>🧱 Direct Total Sq.Ft</h4>
+             <p>Total Area: ${directSqft.toFixed(2)} sq.ft</p>
+             <p>Total Boxes: ${boxes}</p>
+             <p>Price per Sq.ft: ₹${directPrice.toFixed(2)}</p>
+             <p>Price per Box: ₹${pricePerBox.toFixed(2)}</p>
+             <p>Total Cost: ₹${cost.toFixed(2)}</p>
+             <p>Total Weight: ${weight.toFixed(2)} kg</p>`;
 
-    totalArea = directSqft;
-    totalBoxes = boxes;
-    totalWeight = weight;
-    totalCost = cost;
+  totalArea = directSqft;
+  totalBoxes = boxes;
+  totalWeight = weight;
+  totalCost = cost;
 
-    window.totalFloorData = {
-      mode: "direct",
-      area: directSqft,
-      totalBoxes: boxes,
-      price: directPrice,
-      cost,
-      weight
-    };
-  }
+  window.totalFloorData = {
+    mode: "direct",
+    area: directSqft,
+    totalBoxes: boxes,
+    price: directPrice,
+    cost,
+    weight
+  };
+}
+
+
 
   // ✅ LENGTH × WIDTH MODE
   else if (!useDirect && !isNaN(length) && !isNaN(width) && !isNaN(price)) {
@@ -740,3 +744,4 @@ function toggleTotalSqftInputs() {
   document.getElementById("floorInputs").style.display = isChecked ? "none" : "block";
   document.getElementById("directSqftInputs").style.display = isChecked ? "block" : "none";
 }
+
